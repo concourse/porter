@@ -5,9 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"../k8s"
+
 	"code.cloudfoundry.org/lager"
-	//"github.com/concourse/porter/k8s"
+	"github.com/concourse/porter/k8s"
 )
 
 func main() {

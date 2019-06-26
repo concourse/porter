@@ -6,12 +6,11 @@ import (
 	"os"
 	"time"
 	"context"
-	"../k8s"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"code.cloudfoundry.org/lager"
-	//"github.com/concourse/concourse/atc/k8s"
+	"github.com/concourse/porter/k8s"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
