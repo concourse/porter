@@ -6,5 +6,5 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build outputpusher
-RUN go build inputpuller
+RUN cd ./outputpusher && go build .
+RUN cd ./inputpuller && go build .
