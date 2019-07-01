@@ -1,4 +1,4 @@
-package blob_io
+package blobio
 
 import (
 	"code.cloudfoundry.org/lager"

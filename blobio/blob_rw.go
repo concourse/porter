@@ -1,4 +1,4 @@
-package k8s
+package blobio
 
 import (
 	"context"
@@ -10,23 +10,21 @@ import (
 	_ "gocloud.dev/blob/s3blob"
 )
 
-
 //go:generate counterfeiter . BlobstoreIO
-type BlobstoreIO interface{
+type BlobstoreIO interface {
 	InputBlobReader(lager.Logger, context.Context) (io.Reader, error)
 	OutputBlobWriter(lager.Logger, context.Context) (io.Writer, error)
 }
 
-
 type BlobReaderWriter struct {
-	BucketURL string
+	BucketURL  string
 	SourcePath string
 	TargetPath string
 }
 
 func NewBlobReaderWriter(bucketURL string, sourcePath string, targetPath string) BlobstoreIO {
 	return &BlobReaderWriter{
-		BucketURL: bucketURL,
+		BucketURL:  bucketURL,
 		SourcePath: sourcePath,
 		TargetPath: targetPath,
 	}
@@ -64,5 +62,3 @@ func (brw *BlobReaderWriter) OutputBlobWriter(logger lager.Logger, ctx context.C
 	}
 	return w, nil
 }
-
-
