@@ -1,22 +1,22 @@
-package k8s
+package blob_io
 
 import (
 	"code.cloudfoundry.org/lager"
 	"context"
+	"fmt"
 	"github.com/concourse/go-archive/tgzfs"
 	"os"
-	"fmt"
 )
 
 const (
-	BUCKET_TYPE_S3 = "s3"
+	BUCKET_TYPE_S3  = "s3"
 	BUCKET_TYPE_GCS = "gcs"
 )
 
-func main(){
+func main() {
 	bucketConfig := BucketConfig{
-		Type: "s3",
-		URL: "s3://concourse-rootfs",
+		Type:   "s3",
+		URL:    "s3://concourse-rootfs",
 		Secret: "notasecret",
 	}
 	Pull(lager.NewLogger("testpull"), context.TODO(), bucketConfig, "rootfs.tar.gz", "/tmp")
@@ -24,7 +24,7 @@ func main(){
 
 type BucketConfig struct {
 	Type string
-	URL string
+	URL  string
 	// if s3 should inclue AWS_ACCESS_KEY and AWS_SECRET and AWS_REGION,
 	// if GCS should include GCP_JSON_FILE_PATH
 	Secret string
@@ -33,7 +33,7 @@ type BucketConfig struct {
 func Pull(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourceKey, destinationPath string) error {
 	blob := NewBlobReaderWriter(getBucketURL(bucket), sourceKey, destinationPath)
 
-	blobReader, err:= blob.InputBlobReader(logger, ctx)
+	blobReader, err := blob.InputBlobReader(logger, ctx)
 	if err != nil {
 		logger.Error("could-not-create-blob-reader", err)
 		return err
@@ -46,7 +46,7 @@ func Pull(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourceK
 func Push(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourcePath, destinationKey string) error {
 	blob := NewBlobReaderWriter(getBucketURL(bucket), sourcePath, destinationKey)
 
-	blobWriter, err:= blob.OutputBlobWriter(logger, ctx)
+	blobWriter, err := blob.OutputBlobWriter(logger, ctx)
 	if err != nil {
 		logger.Error("could-not-create-blob-writer", err)
 		return err
