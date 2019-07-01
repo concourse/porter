@@ -60,36 +60,52 @@ func (pc *PushCommand) Execute(args []string) error {
 		pod, ok := event.Object.(*v1.Pod)
 		if !ok {
 			logger.Debug("failed to typecast, this should never happen...")
+			continue
 		}
 
-		for _, containerInfo := range pod.Status.ContainerStatuses {
-			terminationInfo := containerInfo.State
+		err := checkTermination(
+			pc.ContainerName,
+			pod.Status.ContainerStatuses,
+			func() error {
+				logger.Info("monitored container exited successfully", lager.Data{})
+				// *push outputs here*
+				// k8s.Push(logger, context.Background(), bucketConfig, *sourceKey, *destionationPath)
+				return nil
+			},
+			func(exitCode int32) error {
+				logger.Info("monitored container returned non-zero exit code", lager.Data{
+					"podname":  pc.PodName,
+					"ExitCode": exitCode,
+				})
+				return ErrMonitoredContainerExitFail
+			},
+		)
 
-			if containerInfo.Name == pc.ContainerName && terminationInfo.Terminated != nil {
-
-				if terminationInfo.Terminated.ExitCode == 0 {
-					logger.Info("monitored container exited successfully", lager.Data{})
-
-					//url := os.Getenv("BUCKET_URL")
-					//bucketConfig := k8s.BucketConfig{
-					//	Type:   *bucketType,
-					//	URL:    url,
-					//	Secret: "notasecret",
-					//}
-					//
-					//k8s.Push(logger, context.Background(), bucketConfig, *sourceKey, *destionationPath)
-					return nil
-				} else if terminationInfo.Terminated.ExitCode != 0 {
-					logger.Info("monitored container returned non-zero exit code", lager.Data{
-						"podname":  pc.PodName,
-						"ExitCode": terminationInfo.Terminated.ExitCode,
-					})
-					return ErrMonitoredContainerExitFail
-				}
-			}
+		if err != nil {
+			return err
 		}
 	}
 
+	return nil
+}
+
+func checkTermination(
+	container string,
+	statuses []v1.ContainerStatus,
+	onExit0 func() error,
+	onExitN func(exitCode int32) error,
+) error {
+	for _, containerInfo := range statuses {
+		state := containerInfo.State
+
+		if containerInfo.Name == container && state.Terminated != nil {
+			if state.Terminated.ExitCode == 0 {
+				return onExit0()
+			} else if state.Terminated.ExitCode != 0 {
+				return onExitN(state.Terminated.ExitCode)
+			}
+		}
+	}
 	return nil
 }
 
