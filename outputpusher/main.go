@@ -2,14 +2,14 @@ package main
 
 import (
 	//"context"
-	"flag"
+	"errors"
 	"fmt"
-	"k8s.io/api/core/v1"
 	"os"
-	"sync"
 
 	"code.cloudfoundry.org/lager"
+	"github.com/jessevdk/go-flags"
 	//"github.com/concourse/porter/k8s"
+	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
@@ -17,82 +17,99 @@ import (
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
-func main() {
+var ErrMonitoredContainerExitFail = errors.New("monitored container did not exit well")
 
-	podname := flag.String("pod", "", "name of the pod")
-	containername := flag.String("container", "", "name of the container to wait for")
-	//bucketType := flag.String("bucketType", "", "bucket type, allowed values are s3 and gcs")
-	//sourceKey := flag.String("sourceKey", "", "source to be downloaded")
-	//destionationPath := flag.String("destionationPath", "", "location to place the downloaded artifact")
+type PushCommand struct {
+	PodName       string `required:"true" positional-args:"yes" description:"Pod to watch"`
+	ContainerName string `required:"true" positional-args:"yes" description:"Container to wait till completion"`
 
-	flag.Parse()
+	SourcePath     string `required:"true" description:"Path to outputs dir intended to be pushed"`
+	DestinationURL string `required:"true" description:"Location inside provided bucket to deposite output blobs"`
+}
 
-	logger := lager.NewLogger("output-push")
-	fmt.Println("running your watcher cmd with args", *podname, *containername)
+func (pc *PushCommand) Execute(args []string) error {
+	logger.Debug("push-execute", lager.Data{
+		"podname":       pc.PodName,
+		"containername": pc.ContainerName,
+	})
 
-	// creates the in-cluster config
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		logger.Error("failed to retrieve cluster config", err)
-		os.Exit(1)
+		return err
 	}
-	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		logger.Error("failed to create client with fetched config", err)
-		os.Exit(1)
+		return err
 	}
 
-	// another approach? seems more native with the Watch() client endpoint
 	watch, err := clientset.CoreV1().Pods("default").Watch(metav1.ListOptions{
-		FieldSelector: fmt.Sprintf("metadata.name=%s", *podname),
+		FieldSelector: fmt.Sprintf("metadata.name=%s", pc.PodName),
 	})
 	if err != nil {
 		logger.Error("failed to find pod", err)
-		os.Exit(1)
+		return err
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		for event := range watch.ResultChan() {
-			fmt.Println("got an event", event)
-			// we only care when event.Type == MODIFIED, This event
-			// occurs when ContainerStatus is updated
-			pod, ok := event.Object.(*v1.Pod)
-			if !ok {
-				logger.Debug("failed to typecast")
-			}
+	for event := range watch.ResultChan() {
+		// We only care when event.Type == MODIFIED
+		// MODIFIED events occur when ContainerStatus is
+		// updated, which contains exit code
 
-			for _, containerInfo := range pod.Status.ContainerStatuses {
-				terminationInfo := containerInfo.State
+		pod, ok := event.Object.(*v1.Pod)
+		if !ok {
+			logger.Debug("failed to typecast, this should never happen...")
+		}
 
-				if containerInfo.Name == *containername && terminationInfo.Terminated != nil {
+		for _, containerInfo := range pod.Status.ContainerStatuses {
+			terminationInfo := containerInfo.State
 
-					if terminationInfo.Terminated.ExitCode == 0 {
-						fmt.Println("watched container exited well")
-						//url := os.Getenv("BUCKET_URL")
-						//bucketConfig := k8s.BucketConfig{
-						//	Type:   *bucketType,
-						//	URL:    url,
-						//	Secret: "notasecret",
-						//}
-						//
-						//k8s.Push(logger, context.Background(), bucketConfig, *sourceKey, *destionationPath)
-						wg.Done()
-						os.Exit(0)
-					} else if terminationInfo.Terminated.ExitCode != 0 {
-						fmt.Println("watched container exited bad")
-						logger.Info("output producer container returned non-zero exit code")
-						wg.Done()
-						os.Exit(1)
-					}
+			if containerInfo.Name == pc.ContainerName && terminationInfo.Terminated != nil {
+
+				if terminationInfo.Terminated.ExitCode == 0 {
+					logger.Info("monitored container exited successfully", lager.Data{})
+
+					//url := os.Getenv("BUCKET_URL")
+					//bucketConfig := k8s.BucketConfig{
+					//	Type:   *bucketType,
+					//	URL:    url,
+					//	Secret: "notasecret",
+					//}
+					//
+					//k8s.Push(logger, context.Background(), bucketConfig, *sourceKey, *destionationPath)
+					return nil
+				} else if terminationInfo.Terminated.ExitCode != 0 {
+					logger.Info("monitored container returned non-zero exit code", lager.Data{
+						"podname":  pc.PodName,
+						"ExitCode": terminationInfo.Terminated.ExitCode,
+					})
+					return ErrMonitoredContainerExitFail
 				}
 			}
 		}
-	}()
-	wg.Wait()
-	fmt.Println("done waiting")
-	os.Exit(0)
+	}
 
+	return nil
+}
+
+var (
+	logger lager.Logger
+	Push   PushCommand
+)
+
+func main() {
+	logger = lager.NewLogger("porter-push")
+	sink := lager.NewWriterSink(os.Stderr, lager.DEBUG)
+	logger.RegisterSink(sink)
+
+	parser := flags.NewParser(&Push, flags.HelpFlag|flags.PrintErrors|flags.IgnoreUnknown)
+	parser.NamespaceDelimiter = "-"
+
+	_, err := parser.Parse()
+	if err != nil {
+		os.Exit(1)
+	}
+
+	os.Exit(0)
 }
