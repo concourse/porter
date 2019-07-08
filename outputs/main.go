@@ -1,17 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"code.cloudfoundry.org/lager"
-	"github.com/concourse/porter/outputs/watch"
+	cwatch "github.com/concourse/porter/outputs/watch"
 	"github.com/jessevdk/go-flags"
-	"k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
@@ -40,7 +37,7 @@ func (pc *PushCommand) Execute(args []string) error {
 		return err
 	}
 
-	watcher := ContainerWatcher{
+	watcher := cwatch.ContainerWatcher{
 		Client:        clientset,
 		ContainerName: pc.ContainerName,
 		PodName:       pc.PodName,
