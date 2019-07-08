@@ -7,6 +7,8 @@ require (
 	github.com/concourse/go-archive v1.0.1
 	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/onsi/ginkgo v1.8.0
+	github.com/onsi/gomega v1.5.0
 	gocloud.dev v0.15.0
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
 	golang.org/x/sys v0.0.0-20190531175056-4c3a928424d2 // indirect
