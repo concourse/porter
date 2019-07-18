@@ -43,6 +43,7 @@ func (brw *BlobReaderWriter) InputBlobReader(logger lager.Logger, ctx context.Co
 		logger.Error("Failed to obtain reader: %s", err)
 		return nil, err
 	}
+
 	return r, nil
 }
 
@@ -54,7 +55,6 @@ func (brw *BlobReaderWriter) OutputBlobWriter(logger lager.Logger, ctx context.C
 	}
 	defer bucket.Close()
 
-	// Prepare the file for upload.
 	w, err := bucket.NewWriter(ctx, brw.TargetPath, nil)
 	if err != nil {
 		logger.Error("Failed to obtain writer: %s", err)

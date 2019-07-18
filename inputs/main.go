@@ -5,32 +5,34 @@ import (
 	"os"
 
 	"code.cloudfoundry.org/lager"
-	"github.com/concourse/porter/k8s"
+	"github.com/concourse/porter/blobio"
 	"github.com/jessevdk/go-flags"
 )
 
 type PullCommand struct {
-	SourceURL       string `required:"true" description:"Location to fetch input blobs from"`
+	SourcePath       string `required:"true" description:"Location to fetch input blobs from within the bucket."`
+	BucketURL string `required:"true" description:"Location of the bucket to fetch blobs from"`
 	DestinationPath string `required:"true" description:"Path to inflate with fetched blobs"`
+	Region string `required:"false" description:"AWS Region"`
 }
 
 func (pc *PullCommand) Execute(args []string) error {
-	url := os.Getenv("BUCKET_URL")
-	bucketConfig := k8s.BucketConfig{
-		Type:   *bucketType,
-		URL:    url,
+	bucketConfig := blobio.BucketConfig{
+		Region: pc.Region,
+		URL:    pc.BucketURL,
 		Secret: "notasecret",
 	}
 
-	k8s.Pull(
+	err := blobio.Pull(
 		logger,
 		context.Background(),
 		bucketConfig,
-		pc.SourceURL,
+		pc.SourcePath,
 		pc.DestinationPath,
 	)
 
-	return nil
+	return err
+
 }
 
 var (

@@ -17,7 +17,7 @@ type PushCommand struct {
 	ContainerName string `required:"true" positional-args:"yes" description:"Container to wait till completion"`
 
 	SourcePath     string `required:"true" description:"Path to outputs dir intended to be pushed"`
-	DestinationURL string `required:"true" description:"Location inside provided bucket to deposite output blobs"`
+	DestinationURL string `required:"true" description:"Location inside provided bucket to deposit output blobs"`
 }
 
 func (pc *PushCommand) Execute(args []string) error {

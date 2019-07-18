@@ -1,11 +1,12 @@
 package blobio
 
 import (
-	"code.cloudfoundry.org/lager"
 	"context"
 	"fmt"
-	"github.com/concourse/go-archive/tgzfs"
 	"os"
+
+	"code.cloudfoundry.org/lager"
+	"github.com/concourse/go-archive/tgzfs"
 )
 
 const (
@@ -13,25 +14,22 @@ const (
 	BUCKET_TYPE_GCS = "gcs"
 )
 
-func main() {
-	bucketConfig := BucketConfig{
-		Type:   "s3",
-		URL:    "s3://concourse-rootfs",
-		Secret: "notasecret",
-	}
-	Pull(lager.NewLogger("testpull"), context.TODO(), bucketConfig, "rootfs.tar.gz", "/tmp")
-}
 
 type BucketConfig struct {
-	Type string
 	URL  string
 	// if s3 should inclue AWS_ACCESS_KEY and AWS_SECRET and AWS_REGION,
 	// if GCS should include GCP_JSON_FILE_PATH
 	Secret string
+	Region string
+}
+
+func (b BucketConfig) BucketType() string {
+	//TODO
+	return BUCKET_TYPE_S3
 }
 
 func Pull(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourceKey, destinationPath string) error {
-	blob := NewBlobReaderWriter(getBucketURL(bucket), sourceKey, destinationPath)
+	blob := NewBlobReaderWriter(bucket.URL, sourceKey, destinationPath)
 
 	blobReader, err := blob.InputBlobReader(logger, ctx)
 	if err != nil {
@@ -39,8 +37,8 @@ func Pull(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourceK
 		return err
 	}
 
-	tgzfs.Extract(blobReader, destinationPath)
-	return nil
+	return tgzfs.Extract(blobReader, destinationPath)
+
 }
 
 func Push(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourcePath, destinationKey string) error {
@@ -52,13 +50,12 @@ func Push(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourceP
 		return err
 	}
 
-	tgzfs.Compress(blobWriter, destinationKey)
-	return nil
+	return tgzfs.Compress(blobWriter, destinationKey)
 }
 
 func getBucketURL(bucket BucketConfig) string {
 	url := bucket.URL
-	if bucket.Type == BUCKET_TYPE_S3 {
+	if bucket.BucketType() == BUCKET_TYPE_S3 {
 		region := os.Getenv("AWS_REGION")
 		url = fmt.Sprintf("%s/?region=%s", url, region)
 	}
