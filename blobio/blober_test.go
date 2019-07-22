@@ -1,4 +1,4 @@
-package blobio
+package blobio_test
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	. "github.com/concourse/porter/blobio"
 	"code.cloudfoundry.org/lager"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

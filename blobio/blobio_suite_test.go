@@ -1,4 +1,4 @@
-package blobio
+package blobio_test
 import (
 	"bytes"
 	"testing"
