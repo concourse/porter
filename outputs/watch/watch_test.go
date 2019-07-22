@@ -1,7 +1,8 @@
-package watch
+package watch_test
 
 import (
 	"code.cloudfoundry.org/lager/lagertest"
+	. "github.com/concourse/porter/outputs/watch"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"k8s.io/api/core/v1"
