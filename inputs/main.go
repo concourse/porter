@@ -20,15 +20,13 @@ func (pc *PullCommand) Execute(args []string) error {
 		URL:    pc.BucketURL,
 	}
 
-	err := blobio.Pull(
+	return blobio.Pull(
 		logger,
 		context.Background(),
 		bucketConfig,
 		pc.SourcePath,
 		pc.DestinationPath,
 	)
-
-	return err
 
 }
 

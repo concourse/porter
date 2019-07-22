@@ -8,6 +8,8 @@ import (
 	"gocloud.dev/blob"
 	_ "gocloud.dev/blob/gcsblob"
 	_ "gocloud.dev/blob/s3blob"
+
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 //go:generate counterfeiter . BlobstoreIO
@@ -18,15 +20,14 @@ type BlobstoreIO interface {
 
 type BlobReaderWriter struct {
 	BucketURL  string
-	SourcePath string
-	TargetPath string
+	BucketKey string
+
 }
 
-func NewBlobReaderWriter(bucketURL string, sourcePath string, targetPath string) BlobstoreIO {
+func NewBlobReaderWriter(bucketURL string, bucketKey string) BlobstoreIO {
 	return &BlobReaderWriter{
 		BucketURL:  bucketURL,
-		SourcePath: sourcePath,
-		TargetPath: targetPath,
+		BucketKey: bucketKey,
 	}
 }
 
@@ -38,7 +39,7 @@ func (brw *BlobReaderWriter) InputBlobReader(logger lager.Logger, ctx context.Co
 	}
 	defer bucket.Close()
 
-	r, err := bucket.NewReader(ctx, brw.SourcePath, nil)
+	r, err := bucket.NewReader(ctx, brw.BucketKey, nil)
 	if err != nil {
 		logger.Error("Failed to obtain reader: %s", err)
 		return nil, err
@@ -55,7 +56,7 @@ func (brw *BlobReaderWriter) OutputBlobWriter(logger lager.Logger, ctx context.C
 	}
 	defer bucket.Close()
 
-	w, err := bucket.NewWriter(ctx, brw.TargetPath, nil)
+	w, err := bucket.NewWriter(ctx, brw.BucketKey, nil)
 	if err != nil {
 		logger.Error("Failed to obtain writer: %s", err)
 		return nil, err

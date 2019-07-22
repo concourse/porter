@@ -39,7 +39,6 @@ github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973/go.mod h1:Dwedo/Wpr24
 github.com/census-instrumentation/opencensus-proto v0.2.0/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd/go.mod h1:sE/e/2PUdi/liOCUjSTXgM1o87ZssimdTWN964YiIeI=
-github.com/concourse/concourse v4.2.3+incompatible h1:uZzY65RxRfnXyc4xm0inLdd9urYK4dxFiRAHUZOFwZI=
 github.com/concourse/go-archive v1.0.1 h1:6jQk0VDiE4G6lNJQ0mLZ7XmxbqI3spO4x0wgVwk4pfo=
 github.com/concourse/go-archive v1.0.1/go.mod h1:Xfo080IPQBmVz3I5ehjCddW3phA2mwv0NFwlpjf5CO8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

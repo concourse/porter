@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"github.com/concourse/porter/blobio"
 	"os"
 
 	"code.cloudfoundry.org/lager"
@@ -8,16 +10,15 @@ import (
 	"github.com/jessevdk/go-flags"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 type PushCommand struct {
 	PodName       string `required:"true" positional-args:"yes" description:"Pod to watch"`
 	ContainerName string `required:"true" positional-args:"yes" description:"Container to wait till completion"`
 
-	SourcePath     string `required:"true" description:"Path to outputs dir intended to be pushed"`
-	DestinationURL string `required:"true" description:"Location inside provided bucket to deposit output blobs"`
+	SourcePath      string `required:"true" description:"Location to fetch input blobs from within the bucket."`
+	BucketURL       string `required:"true" description:"Location of the bucket to fetch blobs from"`
+	DestinationPath string `required:"true" description:"Path to inflate with fetched blobs"`
 }
 
 func (pc *PushCommand) Execute(args []string) error {
@@ -43,7 +44,23 @@ func (pc *PushCommand) Execute(args []string) error {
 		PodName:       pc.PodName,
 	}
 
-	return watcher.Start(logger)
+	err = watcher.Wait(logger)
+	if err != nil {
+		return err
+	}
+
+	bucketConfig := blobio.BucketConfig{
+		URL: pc.BucketURL,
+	}
+
+	return  blobio.Push(
+		logger,
+		context.Background(),
+		bucketConfig,
+		pc.SourcePath,
+		pc.DestinationPath,
+	)
+
 }
 
 var (

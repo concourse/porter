@@ -1,21 +1,21 @@
-package main
-
+package blobio
 import (
+	"bytes"
 	"testing"
 
-	"archive/tar"
-	"compress/gzip"
-	"errors"
-	"fmt"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"io"
-	"os"
+"archive/tar"
+"compress/gzip"
+"errors"
+"fmt"
+. "github.com/onsi/ginkgo"
+. "github.com/onsi/gomega"
+"io"
+"os"
 )
 
 func TestInputs(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Inputs Suite")
+	RunSpecs(t, "Blobio Suite")
 }
 
 func CreateTarball(tarballFilePath string, filePaths []string) error {
@@ -73,4 +73,36 @@ func addFileToTarWriter(filePath string, tarWriter *tar.Writer) error {
 	}
 
 	return nil
+}
+
+func readArchive(filePath string) (map[string]string, error){
+	contents := make(map[string]string)
+	f, err := os.Open(filePath)
+	defer f.Close()
+
+	gzf, err := gzip.NewReader(f)
+	if err != nil {
+		return nil, err
+	}
+
+	// Open and iterate through the files in the archive.
+	tr := tar.NewReader(gzf)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break // End of archive
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		buf := new(bytes.Buffer)
+		_, err = buf.ReadFrom(tr)
+		if err != nil {
+			return nil, err
+		}
+		contents["/" + hdr.Name] = buf.String()
+
+	}
+	return contents, nil
 }
