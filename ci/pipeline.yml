@@ -1,0 +1,128 @@
+groups: []
+resources:
+- name: porter-image-dev
+  type: docker-image
+  source:
+    password: ((docker.password))
+    repository: concourse/porter-dev
+    tag: dev
+    username: ((docker.username))
+  icon: docker
+- name: porter-image-passed
+  type: docker-image
+  source:
+    password: ((docker.password))
+    repository: concourse/porter-dev
+    tag: passed
+    username: ((docker.username))
+  icon: docker
+- name: porter-repo
+  type: git
+  source:
+    branch: master
+    private_key: ((concourse_bot_private_key))
+    uri: git@github.com:concourse/porter
+  icon: github-circle
+- name: ubuntu-bionic
+  type: docker-image
+  source:
+    repository: ubuntu
+    tag: bionic
+  icon: docker
+- name: version
+  type: semver
+  source:
+    branch: master
+    driver: git
+    file: version
+    private_key: ((concourse_bot_private_key))
+    uri: git@github.com:concourse/porter
+  icon: tag
+resource_types:
+- name: docker-image
+  type: registry-image
+  source:
+    repository: concourse/docker-image-resource
+  privileged: true
+
+
+jobs:
+- name: build-ubuntu
+  plan:
+  - in_parallel:
+      steps:
+      - get: porter-repo
+        trigger: true
+      - get: ubuntu-bionic
+        trigger: true
+        params:
+          save: true
+  - put: porter-image-dev
+    params:
+      build: porter-repo
+      dockerfile: porter-repo/Dockerfile
+      load_base: ubuntu-bionic
+- name: publish-major
+  plan:
+  - in_parallel:
+      steps:
+      - get: porter-repo
+        passed:
+        - build-ubuntu
+      - get: porter-image-dev
+        passed:
+        - build-ubuntu
+        params:
+          save: true
+      - get: version
+        params:
+          bump: major
+  - put: porter-image-passed
+    params:
+      load: porter-image-dev
+  - put: version
+    params:
+      file: version/version
+- name: publish-minor
+  plan:
+  - in_parallel:
+      steps:
+      - get: porter-repo
+        passed:
+        - build-ubuntu
+      - get: porter-image-dev
+        passed:
+        - build-ubuntu
+        params:
+          save: true
+      - get: version
+        params:
+          bump: minor
+  - put: porter-image-passed
+    params:
+      load: porter-image-dev
+  - put: version
+    params:
+      file: version/version
+- name: publish-patch
+  plan:
+  - in_parallel:
+      steps:
+      - get: porter-repo
+        passed:
+        - build-ubuntu
+      - get: porter-image-dev
+        passed:
+        - build-ubuntu
+        params:
+          save: true
+      - get: version
+        params:
+          bump: patch
+    image: porter-image-dev
+  - put: porter-image-passed
+    params:
+      load: porter-image-dev
+  - put: version
+    params:
+      file: version/version
