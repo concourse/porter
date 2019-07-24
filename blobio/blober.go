@@ -1,15 +1,16 @@
 package blobio
 
 import (
-	"code.cloudfoundry.org/lager"
 	"context"
-	"github.com/concourse/go-archive/tgzfs"
 	"os"
 	"path/filepath"
+
+	"code.cloudfoundry.org/lager"
+	"github.com/concourse/go-archive/tarfs"
 )
 
 type BucketConfig struct {
-	URL  string
+	URL string
 	// if s3 should inclue AWS_ACCESS_KEY and AWS_SECRET and AWS_REGION,
 	// if GCS should include GCP_JSON_FILE_PATH
 }
@@ -23,7 +24,7 @@ func Pull(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourceK
 		return err
 	}
 
-	return tgzfs.Extract(blobReader, destinationPath)
+	return tarfs.Extract(blobReader, destinationPath)
 
 }
 
@@ -51,5 +52,5 @@ func Push(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourceP
 		return err
 	}
 
-	return tgzfs.Compress(blobWriter, sourcePath, paths...)
+	return tarfs.Compress(blobWriter, sourcePath, paths...)
 }

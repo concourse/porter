@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	. "github.com/concourse/porter/blobio"
 	"code.cloudfoundry.org/lager"
+	"github.com/concourse/porter/blobio"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	_ "gocloud.dev/blob/fileblob"
@@ -18,19 +18,18 @@ var _ = Describe("Blober", func() {
 	var (
 		blobstoreDir string
 
-		err          error
-		bucketURL    string
+		err       error
+		bucketURL string
 
-		logger lager.Logger
-		bucketConfig BucketConfig
-
+		logger       lager.Logger
+		bucketConfig blobio.BucketConfig
 	)
 
 	Context("Pull blobs using local file system backed bucket", func() {
 		var (
-			fileToPull *os.File
+			fileToPull  *os.File
 			tmpInputDir string
-			sourcePath string
+			sourcePath  string
 		)
 		BeforeEach(func() {
 			logger = lager.NewLogger("porter-pull-test")
@@ -54,11 +53,11 @@ var _ = Describe("Blober", func() {
 				log.Fatal(err)
 			}
 
-			CreateTarball(blobstoreDir+"/" + sourcePath, []string{fileToPull.Name()})
+			CreateTarball(blobstoreDir+"/"+sourcePath, []string{fileToPull.Name()})
 
 			bucketURL = "file://" + filepath.ToSlash(blobstoreDir)
 
-			bucketConfig = BucketConfig{
+			bucketConfig = blobio.BucketConfig{
 				URL: bucketURL,
 			}
 
@@ -76,7 +75,7 @@ var _ = Describe("Blober", func() {
 		})
 		It("pull an archive with the correct extracted content", func() {
 
-			err := Pull(logger, context.Background(), bucketConfig, sourcePath, tmpInputDir)
+			err := blobio.Pull(logger, context.Background(), bucketConfig, sourcePath, tmpInputDir)
 			Expect(err).ToNot(HaveOccurred())
 
 			fileContents, err := ioutil.ReadFile(tmpInputDir + fileToPull.Name())
@@ -87,11 +86,10 @@ var _ = Describe("Blober", func() {
 
 	})
 
-
 	Context("Push blobs using local file system backed bucket", func() {
 		var (
-			tmpOutputDir string
-			tmpInnerDir string
+			tmpOutputDir   string
+			tmpInnerDir    string
 			destinationKey string
 		)
 		BeforeEach(func() {
@@ -99,13 +97,12 @@ var _ = Describe("Blober", func() {
 			sink := lager.NewWriterSink(os.Stderr, lager.DEBUG)
 			logger.RegisterSink(sink)
 
-
 			tmpOutputDir, err = ioutil.TempDir("/tmp", "porter-test-push-dir")
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			err = ioutil.WriteFile( tmpOutputDir + "/foo-file", []byte("hello world"), 0644)
+			err = ioutil.WriteFile(tmpOutputDir+"/foo-file", []byte("hello world"), 0644)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -115,7 +112,7 @@ var _ = Describe("Blober", func() {
 				log.Fatal(err)
 			}
 
-			err = ioutil.WriteFile( tmpInnerDir + "/baz-file", []byte("hello world 2"), 0644)
+			err = ioutil.WriteFile(tmpInnerDir+"/baz-file", []byte("hello world 2"), 0644)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -131,10 +128,9 @@ var _ = Describe("Blober", func() {
 
 			bucketURL = "file://" + filepath.ToSlash(blobstoreDir)
 
-			bucketConfig = BucketConfig{
+			bucketConfig = blobio.BucketConfig{
 				URL: bucketURL,
 			}
-
 
 		})
 		AfterEach(func() {
@@ -143,22 +139,25 @@ var _ = Describe("Blober", func() {
 
 		})
 		It("push outputs dir to a compressed archive", func() {
-			err := Push(logger, context.Background(), bucketConfig, tmpOutputDir, destinationKey)
+			err := blobio.Push(logger, context.Background(), bucketConfig, tmpOutputDir, destinationKey)
 			Expect(err).ToNot(HaveOccurred())
 			// Test compressed file is present in blobstore and its contents are hello world
 
 			var files []string
 			// get filename in blobstore
 			err = filepath.Walk(blobstoreDir, func(path string, info os.FileInfo, err error) error {
-				files = append(files, path)
+				if !info.IsDir() {
+					files = append(files, path)
+				}
 				return nil
 			})
 			Expect(err).ToNot(HaveOccurred())
+			Expect(files).ToNot(BeEmpty())
 
-			contents, err := readArchive(files[1])
+			contents, err := readArchive(files[0])
 			Expect(err).ToNot(HaveOccurred())
-			Expect(contents[tmpOutputDir + "/foo-file"]).To(Equal("hello world"))
-			Expect(contents[tmpInnerDir + "/baz-file"]).To(Equal("hello world 2"))
+			Expect(contents[tmpOutputDir+"/foo-file"]).To(Equal("hello world"))
+			Expect(contents[tmpInnerDir+"/baz-file"]).To(Equal("hello world 2"))
 		})
 
 	})

@@ -1,16 +1,16 @@
 package blobio_test
+
 import (
+	"archive/tar"
 	"bytes"
+	"errors"
+	"fmt"
+	"io"
+	"os"
 	"testing"
 
-"archive/tar"
-"compress/gzip"
-"errors"
-"fmt"
-. "github.com/onsi/ginkgo"
-. "github.com/onsi/gomega"
-"io"
-"os"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 func TestInputs(t *testing.T) {
@@ -25,10 +25,7 @@ func CreateTarball(tarballFilePath string, filePaths []string) error {
 	}
 	defer file.Close()
 
-	gzipWriter := gzip.NewWriter(file)
-	defer gzipWriter.Close()
-
-	tarWriter := tar.NewWriter(gzipWriter)
+	tarWriter := tar.NewWriter(file)
 	defer tarWriter.Close()
 
 	for _, filePath := range filePaths {
@@ -75,18 +72,17 @@ func addFileToTarWriter(filePath string, tarWriter *tar.Writer) error {
 	return nil
 }
 
-func readArchive(filePath string) (map[string]string, error){
+func readArchive(filePath string) (map[string]string, error) {
 	contents := make(map[string]string)
 	f, err := os.Open(filePath)
 	defer f.Close()
 
-	gzf, err := gzip.NewReader(f)
 	if err != nil {
 		return nil, err
 	}
 
 	// Open and iterate through the files in the archive.
-	tr := tar.NewReader(gzf)
+	tr := tar.NewReader(f)
 	for {
 		hdr, err := tr.Next()
 		if err == io.EOF {
@@ -101,7 +97,7 @@ func readArchive(filePath string) (map[string]string, error){
 		if err != nil {
 			return nil, err
 		}
-		contents["/" + hdr.Name] = buf.String()
+		contents["/"+hdr.Name] = buf.String()
 
 	}
 	return contents, nil
