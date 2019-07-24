@@ -16,7 +16,7 @@ spec:  # specification of the pod's contents
         readOnly: true
       env:
       - name: "GOOGLE_APPLICATION_CREDENTIALS"
-        value: "/secret/gcp_service_key"
+        value: "/secret/gcp-service-key"
     - name: hello
       image: "busybox"
       command: ["/bin/echo 'hello world' > /workspace/hello"]
@@ -34,10 +34,10 @@ spec:  # specification of the pod's contents
           readOnly: true
       env:
         - name: "GOOGLE_APPLICATION_CREDENTIALS"
-          value: "/secret/gcp_service_key"
+          value: "/secret/gcp-service-key"
   volumes:
     - name: workspace
       emptyDir: {}
     - name: secret
       secret:
-        secretName: gcp_secrets
+        secretName: gcp-secrets
