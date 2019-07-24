@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-world
+spec:  # specification of the pod's contents
+  restartPolicy: Never
+  containers:
+    - name: input
+      image: concourse/porter-dev
+      command: ["/opt/porter/in", "-source-path", "/in/somefile.tar", "-bucket-url", "gs://porter-dev-bucket", "-destination-path", "/workspace/inputs" ]
+      volumeMounts:
+      - name: shared-volume
+        mountPath: /workspace
+      - name: secret
+        mountPath: "/secret"
+        readOnly: true
+      env:
+      - name: "GOOGLE_APPLICATION_CREDENTIALS"
+        value: "/secret/gcp_service_key"
+    - name: hello
+      image: "busybox"
+      command: ["/bin/echo 'hello world' > /workspace/hello"]
+      volumeMounts:
+        - mountPath: /workspace
+          name: shared-volume
+    - name: output
+      image: concourse/porter-dev
+      command: ["/opt/porter/out", "-source-path", "/workspace/hello", "-bucket-url", "gs://porter-dev-bucket", "-destination-path", "/out/hello" , "-pod-name", "hello-world", "-container-name", "hello"]
+      volumeMounts:
+        - mountPath: /workspace
+          name: shared-volume
+        - name: secret
+          mountPath: "/secret"
+          readOnly: true
+      env:
+        - name: "GOOGLE_APPLICATION_CREDENTIALS"
+          value: "/secret/gcp_service_key"
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: secret
+      secret:
+        secretName: gcp_secrets

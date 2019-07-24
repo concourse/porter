@@ -13,12 +13,12 @@ import (
 )
 
 type PushCommand struct {
-	PodName       string `required:"true" positional-args:"yes" description:"Pod to watch"`
-	ContainerName string `required:"true" positional-args:"yes" description:"Container to wait till completion"`
+	PodName       string `required:"true" long:"pod-name" positional-args:"yes" description:"Pod to watch"`
+	ContainerName string `required:"true" long:"container-name" positional-args:"yes" description:"Container to wait till completion"`
 
-	SourcePath      string `required:"true" description:"Location to fetch input blobs from within the bucket."`
-	BucketURL       string `required:"true" description:"Location of the bucket to fetch blobs from"`
-	DestinationPath string `required:"true" description:"Path to inflate with fetched blobs"`
+	SourcePath      string `required:"true" long:"source-path" description:"Location to fetch input blobs from within the bucket."`
+	BucketURL       string `required:"true" long:"bucket-url" description:"Location of the bucket to fetch blobs from"`
+	DestinationPath string `required:"true" long:"destination-path" description:"Path to inflate with fetched blobs"`
 }
 
 func (pc *PushCommand) Execute(args []string) error {

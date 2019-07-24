@@ -10,9 +10,9 @@ import (
 )
 
 type PullCommand struct {
-	SourcePath       string `required:"true" description:"Location to fetch input blobs from within the bucket."`
-	BucketURL string `required:"true" description:"Location of the bucket to fetch blobs from"`
-	DestinationPath string `required:"true" description:"Path to inflate with fetched blobs"`
+	SourcePath       string `required:"true" long:"source-path" description:"Location to fetch input blobs from within the bucket."`
+	BucketURL string `required:"true" long:"bucket-url" description:"Location of the bucket to fetch blobs from"`
+	DestinationPath string `required:"true" long:"destination-path" description:"Path to inflate with fetched blobs"`
 }
 
 func (pc *PullCommand) Execute(args []string) error {
