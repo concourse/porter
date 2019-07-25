@@ -24,8 +24,16 @@ func Pull(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourceK
 		return err
 	}
 
-	return tarfs.Extract(blobReader, destinationPath)
+	err = tarfs.Extract(blobReader, destinationPath)
+	if err != nil {
+		return err
+	}
 
+	err = blobReader.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func Push(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourcePath, destinationKey string) error {
@@ -52,5 +60,14 @@ func Push(logger lager.Logger, ctx context.Context, bucket BucketConfig, sourceP
 		return err
 	}
 
-	return tarfs.Compress(blobWriter, sourcePath, paths...)
+	err = tarfs.Compress(blobWriter, sourcePath, paths...)
+	if err != nil {
+		return err
+	}
+
+	err = blobWriter.Close()
+	if err != nil {
+		return err
+	}
+	return nil
 }

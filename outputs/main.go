@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	"github.com/concourse/porter/blobio"
 	"os"
 
-	"code.cloudfoundry.org/lager"
-	cwatch "github.com/concourse/porter/outputs/watch"
-	"github.com/jessevdk/go-flags"
+	"github.com/concourse/porter/blobio"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	cwatch "github.com/concourse/porter/outputs/watch"
+
+	"code.cloudfoundry.org/lager"
+	"github.com/jessevdk/go-flags"
 )
 
 type PushCommand struct {
@@ -53,14 +54,19 @@ func (pc *PushCommand) Execute(args []string) error {
 		URL: pc.BucketURL,
 	}
 
-	return  blobio.Push(
+	err = blobio.Push(
 		logger,
 		context.Background(),
 		bucketConfig,
 		pc.SourcePath,
 		pc.DestinationPath,
 	)
+	if err != nil {
+		logger.Error("error-pushing", err)
+		return err
+	}
 
+	return nil
 }
 
 var (
@@ -77,6 +83,12 @@ func main() {
 	parser.NamespaceDelimiter = "-"
 
 	_, err := parser.Parse()
+
+	if err != nil {
+		os.Exit(1)
+	}
+
+	err = Push.Execute(os.Args)
 	if err != nil {
 		os.Exit(1)
 	}

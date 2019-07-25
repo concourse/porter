@@ -48,5 +48,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	err = Pull.Execute(os.Args)
+	if err != nil {
+		os.Exit(1)
+	}
+
 	os.Exit(0)
 }

@@ -32,7 +32,7 @@ resources:
 - name: version
   type: semver
   source:
-    branch: master
+    branch: version
     driver: git
     file: version
     private_key: ((concourse_bot_private_key))
@@ -73,32 +73,45 @@ jobs:
       build: porter-repo
       dockerfile: porter-repo/Dockerfile
       load_base: ubuntu-bionic
+
+
 - name: integration-test
   plan:
-    - in_parallel:
-        steps:
-        - get: porter-image-dev
-          trigger: true
-          passed:
-          - build-ubuntu
-        - get: porter-repo
-          passed:
-          - build-ubuntu
-        - get: kind-on-c
-        - get: kind-release
-          params:
-            globs:
-              - kind-linux-amd64
-    - task: run-kind
-      privileged: true
-      file: kind-on-c/kind.yaml
-      params:
-
-        KIND_TESTS: |
-          # your actual tests go here!
-          kubectl create secret generic gcp-secrets --from-literal=gcp-service-key=((gcp_service_key))
-          kubectl get nodes -o wide
-          kubectl apply -f porter-repo/ci/pod.yaml
+  - get: porter-image-dev
+    trigger: true
+    passed:
+    - build-ubuntu
+  - get: porter-repo
+    passed:
+    - build-ubuntu
+  - get: kind-on-c
+  - get: kind-release
+    params:
+      globs:
+        - kind-linux-amd64
+  - task: prepare-kind
+    config:
+      platform: linux
+      image_resource:
+        type: registry-image
+        source: { repository: bash }
+      inputs:
+        - name: porter-repo
+      outputs:
+        - name: inputs
+      run:
+        path: bash
+        args:
+          - -xeuc
+          - |
+            cp -a porter-repo inputs/
+  - task: run-kind
+    privileged: true
+    file: kind-on-c/kind.yaml
+    params:
+      KIND_TESTS: |
+        kubectl create secret generic gcp-secrets --from-literal=gcp-service-key='((gcp_service_key))'
+        kubectl apply -f inputs/porter-repo/ci/pod.yaml
 - name: publish-major
   plan:
   - in_parallel:

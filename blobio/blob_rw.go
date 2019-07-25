@@ -2,7 +2,6 @@ package blobio
 
 import (
 	"context"
-	"io"
 
 	"code.cloudfoundry.org/lager"
 	"gocloud.dev/blob"
@@ -14,8 +13,8 @@ import (
 
 //go:generate counterfeiter . BlobstoreIO
 type BlobstoreIO interface {
-	InputBlobReader(lager.Logger, context.Context) (io.Reader, error)
-	OutputBlobWriter(lager.Logger, context.Context) (io.Writer, error)
+	InputBlobReader(lager.Logger, context.Context) (*blob.Reader, error)
+	OutputBlobWriter(lager.Logger, context.Context) (*blob.Writer, error)
 }
 
 type BlobReaderWriter struct {
@@ -31,7 +30,7 @@ func NewBlobReaderWriter(bucketURL string, bucketKey string) BlobstoreIO {
 	}
 }
 
-func (brw *BlobReaderWriter) InputBlobReader(logger lager.Logger, ctx context.Context) (io.Reader, error) {
+func (brw *BlobReaderWriter) InputBlobReader(logger lager.Logger, ctx context.Context) (*blob.Reader, error) {
 	bucket, err := blob.OpenBucket(ctx, brw.BucketURL)
 	if err != nil {
 		logger.Error("Failed to setup bucket: %s", err)
@@ -48,7 +47,7 @@ func (brw *BlobReaderWriter) InputBlobReader(logger lager.Logger, ctx context.Co
 	return r, nil
 }
 
-func (brw *BlobReaderWriter) OutputBlobWriter(logger lager.Logger, ctx context.Context) (io.Writer, error) {
+func (brw *BlobReaderWriter) OutputBlobWriter(logger lager.Logger, ctx context.Context) (*blob.Writer, error) {
 	bucket, err := blob.OpenBucket(ctx, brw.BucketURL)
 	if err != nil {
 		logger.Error("Failed to setup bucket: %s", err)

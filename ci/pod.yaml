@@ -6,11 +6,12 @@ spec:  # specification of the pod's contents
   restartPolicy: Never
   containers:
     - name: input
-      image: concourse/porter-dev
-      command: ["/opt/porter/in", "-source-path", "/in/somefile.tar", "-bucket-url", "gs://porter-dev-bucket", "-destination-path", "/workspace/inputs" ]
+      image: concourse/porter-dev:dev
+      command: ["/opt/porter/in/inputs"]
+      args: ["--source-path", "/in/somefile.tar", "--bucket-url", "gs://porter-dev-bucket", "--destination-path", "/workspace/inputs" ]
       volumeMounts:
-      - name: shared-volume
-        mountPath: /workspace
+      - name: workspace
+        mountPath: "/workspace"
       - name: secret
         mountPath: "/secret"
         readOnly: true
@@ -18,17 +19,18 @@ spec:  # specification of the pod's contents
       - name: "GOOGLE_APPLICATION_CREDENTIALS"
         value: "/secret/gcp-service-key"
     - name: hello
-      image: "busybox"
-      command: ["/bin/echo 'hello world' > /workspace/hello"]
+      image: busybox
+      command: ['sh', '-c', 'echo Hello Concourse > /workspace/hello']
       volumeMounts:
-        - mountPath: /workspace
-          name: shared-volume
+        - name: workspace
+          mountPath: "/workspace"
     - name: output
-      image: concourse/porter-dev
-      command: ["/opt/porter/out", "-source-path", "/workspace/hello", "-bucket-url", "gs://porter-dev-bucket", "-destination-path", "/out/hello" , "-pod-name", "hello-world", "-container-name", "hello"]
+      image: concourse/porter-dev:dev
+      command: ["/opt/porter/out/outputs"]
+      args: ["--source-path", "/workspace/hello", "--bucket-url", "gs://porter-dev-bucket", "--destination-path", "/out/hello" , "--pod-name", "hello-world", "--container-name", "hello"]
       volumeMounts:
-        - mountPath: /workspace
-          name: shared-volume
+        - name: workspace
+          mountPath: "/workspace"
         - name: secret
           mountPath: "/secret"
           readOnly: true

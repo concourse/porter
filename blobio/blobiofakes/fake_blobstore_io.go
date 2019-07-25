@@ -3,47 +3,47 @@ package blobiofakes
 
 import (
 	"context"
-	"io"
 	"sync"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/concourse/porter/blobio"
+	"gocloud.dev/blob"
 )
 
 type FakeBlobstoreIO struct {
-	InputBlobReaderStub        func(lager.Logger, context.Context) (io.Reader, error)
+	InputBlobReaderStub        func(lager.Logger, context.Context) (*blob.Reader, error)
 	inputBlobReaderMutex       sync.RWMutex
 	inputBlobReaderArgsForCall []struct {
 		arg1 lager.Logger
 		arg2 context.Context
 	}
 	inputBlobReaderReturns struct {
-		result1 io.Reader
+		result1 *blob.Reader
 		result2 error
 	}
 	inputBlobReaderReturnsOnCall map[int]struct {
-		result1 io.Reader
+		result1 *blob.Reader
 		result2 error
 	}
-	OutputBlobWriterStub        func(lager.Logger, context.Context) (io.Writer, error)
+	OutputBlobWriterStub        func(lager.Logger, context.Context) (*blob.Writer, error)
 	outputBlobWriterMutex       sync.RWMutex
 	outputBlobWriterArgsForCall []struct {
 		arg1 lager.Logger
 		arg2 context.Context
 	}
 	outputBlobWriterReturns struct {
-		result1 io.Writer
+		result1 *blob.Writer
 		result2 error
 	}
 	outputBlobWriterReturnsOnCall map[int]struct {
-		result1 io.Writer
+		result1 *blob.Writer
 		result2 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeBlobstoreIO) InputBlobReader(arg1 lager.Logger, arg2 context.Context) (io.Reader, error) {
+func (fake *FakeBlobstoreIO) InputBlobReader(arg1 lager.Logger, arg2 context.Context) (*blob.Reader, error) {
 	fake.inputBlobReaderMutex.Lock()
 	ret, specificReturn := fake.inputBlobReaderReturnsOnCall[len(fake.inputBlobReaderArgsForCall)]
 	fake.inputBlobReaderArgsForCall = append(fake.inputBlobReaderArgsForCall, struct {
@@ -68,7 +68,7 @@ func (fake *FakeBlobstoreIO) InputBlobReaderCallCount() int {
 	return len(fake.inputBlobReaderArgsForCall)
 }
 
-func (fake *FakeBlobstoreIO) InputBlobReaderCalls(stub func(lager.Logger, context.Context) (io.Reader, error)) {
+func (fake *FakeBlobstoreIO) InputBlobReaderCalls(stub func(lager.Logger, context.Context) (*blob.Reader, error)) {
 	fake.inputBlobReaderMutex.Lock()
 	defer fake.inputBlobReaderMutex.Unlock()
 	fake.InputBlobReaderStub = stub
@@ -81,33 +81,33 @@ func (fake *FakeBlobstoreIO) InputBlobReaderArgsForCall(i int) (lager.Logger, co
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeBlobstoreIO) InputBlobReaderReturns(result1 io.Reader, result2 error) {
+func (fake *FakeBlobstoreIO) InputBlobReaderReturns(result1 *blob.Reader, result2 error) {
 	fake.inputBlobReaderMutex.Lock()
 	defer fake.inputBlobReaderMutex.Unlock()
 	fake.InputBlobReaderStub = nil
 	fake.inputBlobReaderReturns = struct {
-		result1 io.Reader
+		result1 *blob.Reader
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeBlobstoreIO) InputBlobReaderReturnsOnCall(i int, result1 io.Reader, result2 error) {
+func (fake *FakeBlobstoreIO) InputBlobReaderReturnsOnCall(i int, result1 *blob.Reader, result2 error) {
 	fake.inputBlobReaderMutex.Lock()
 	defer fake.inputBlobReaderMutex.Unlock()
 	fake.InputBlobReaderStub = nil
 	if fake.inputBlobReaderReturnsOnCall == nil {
 		fake.inputBlobReaderReturnsOnCall = make(map[int]struct {
-			result1 io.Reader
+			result1 *blob.Reader
 			result2 error
 		})
 	}
 	fake.inputBlobReaderReturnsOnCall[i] = struct {
-		result1 io.Reader
+		result1 *blob.Reader
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeBlobstoreIO) OutputBlobWriter(arg1 lager.Logger, arg2 context.Context) (io.Writer, error) {
+func (fake *FakeBlobstoreIO) OutputBlobWriter(arg1 lager.Logger, arg2 context.Context) (*blob.Writer, error) {
 	fake.outputBlobWriterMutex.Lock()
 	ret, specificReturn := fake.outputBlobWriterReturnsOnCall[len(fake.outputBlobWriterArgsForCall)]
 	fake.outputBlobWriterArgsForCall = append(fake.outputBlobWriterArgsForCall, struct {
@@ -132,7 +132,7 @@ func (fake *FakeBlobstoreIO) OutputBlobWriterCallCount() int {
 	return len(fake.outputBlobWriterArgsForCall)
 }
 
-func (fake *FakeBlobstoreIO) OutputBlobWriterCalls(stub func(lager.Logger, context.Context) (io.Writer, error)) {
+func (fake *FakeBlobstoreIO) OutputBlobWriterCalls(stub func(lager.Logger, context.Context) (*blob.Writer, error)) {
 	fake.outputBlobWriterMutex.Lock()
 	defer fake.outputBlobWriterMutex.Unlock()
 	fake.OutputBlobWriterStub = stub
@@ -145,28 +145,28 @@ func (fake *FakeBlobstoreIO) OutputBlobWriterArgsForCall(i int) (lager.Logger, c
 	return argsForCall.arg1, argsForCall.arg2
 }
 
-func (fake *FakeBlobstoreIO) OutputBlobWriterReturns(result1 io.Writer, result2 error) {
+func (fake *FakeBlobstoreIO) OutputBlobWriterReturns(result1 *blob.Writer, result2 error) {
 	fake.outputBlobWriterMutex.Lock()
 	defer fake.outputBlobWriterMutex.Unlock()
 	fake.OutputBlobWriterStub = nil
 	fake.outputBlobWriterReturns = struct {
-		result1 io.Writer
+		result1 *blob.Writer
 		result2 error
 	}{result1, result2}
 }
 
-func (fake *FakeBlobstoreIO) OutputBlobWriterReturnsOnCall(i int, result1 io.Writer, result2 error) {
+func (fake *FakeBlobstoreIO) OutputBlobWriterReturnsOnCall(i int, result1 *blob.Writer, result2 error) {
 	fake.outputBlobWriterMutex.Lock()
 	defer fake.outputBlobWriterMutex.Unlock()
 	fake.OutputBlobWriterStub = nil
 	if fake.outputBlobWriterReturnsOnCall == nil {
 		fake.outputBlobWriterReturnsOnCall = make(map[int]struct {
-			result1 io.Writer
+			result1 *blob.Writer
 			result2 error
 		})
 	}
 	fake.outputBlobWriterReturnsOnCall[i] = struct {
-		result1 io.Writer
+		result1 *blob.Writer
 		result2 error
 	}{result1, result2}
 }
