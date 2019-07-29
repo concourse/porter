@@ -14,6 +14,12 @@ RUN cd ./inputs && go build .
 
 FROM ubuntu:bionic AS porter
 
+RUN apt-get update && apt-get -y install \
+      iproute2 \
+      ca-certificates \
+      file \
+      dumb-init
+
 COPY --from=builder /src/outputs /opt/porter/out
 COPY --from=builder /src/inputs /opt/porter/in
 RUN chmod +x /opt/porter/*
