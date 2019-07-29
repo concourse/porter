@@ -13,7 +13,6 @@ require (
 	golang.org/x/net v0.0.0-20190522155817-f3200d17e092 // indirect
 	golang.org/x/sys v0.0.0-20190531175056-4c3a928424d2 // indirect
 	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/tools v0.0.0-20190422233926-fe54fb35175b
 	k8s.io/api v0.0.0-20190626000116-b178a738ed00
 	k8s.io/apimachinery v0.0.0-20190624085041-961b39a1baa0
 	k8s.io/client-go v0.0.0-20190626045420-1ec4b74c7bda
