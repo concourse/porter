@@ -110,9 +110,10 @@ jobs:
     file: kind-on-c/kind.yaml
     params:
       KIND_TESTS: |
+        kubectl apply -f inputs/porter-repo/ci/cluster-role-binding.yaml
         kubectl create secret generic gcp-secrets --from-literal=gcp-service-key='((gcp_service_key))'
         kubectl apply -f inputs/porter-repo/ci/pod-push.yaml
-        kubectl wait --for=condition=complete pod/gcp-push-pod
+        sleep 12
         kubectl apply -f inputs/porter-repo/ci/pod-pull.yaml
 - name: publish-major
   plan:
