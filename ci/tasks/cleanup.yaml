@@ -1,0 +1,16 @@
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: google/cloud-sdk
+    tag: 'latest'
+
+params:
+  GCP_SERVICE_KEY: ((gcp_service_key))
+
+inputs:
+  - name: porter-repo
+
+run:
+  path: porter-repo/ci/tasks/cleanup.sh

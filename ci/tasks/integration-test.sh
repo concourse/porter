@@ -33,7 +33,7 @@ gcloud container clusters create $CLUSTER_NAME \
 
 kubectl create clusterrolebinding cluster-admin-binding \
      --clusterrole=cluster-admin \
-     --user=default
+     --serviceaccount=default:default
 kubectl create secret generic gcp-secrets --from-file=gcp-service-key=/tmp/key
 
 kubectl apply -f porter-repo/ci/pod-push.yaml
