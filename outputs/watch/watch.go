@@ -23,14 +23,6 @@ type ContainerWatcher struct {
 }
 
 func (cw *ContainerWatcher) Wait(logger lager.Logger) error {
-
-	pod, err := cw.Client.CoreV1().Pods("default").Get(cw.PodName, metav1.GetOptions{})
-	if err != nil {
-		logger.Error("failed to find pod", err)
-		return err
-	}
-	fmt.Printf("Pod is found %+v\n", pod)
-
 	watch, err := cw.Client.CoreV1().Pods("default").Watch(metav1.ListOptions{
 		FieldSelector: fmt.Sprintf("metadata.name=%s", cw.PodName),
 	})

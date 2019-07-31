@@ -16,7 +16,7 @@ check(){
 
      echo "..."
      attempt_counter=$(($attempt_counter+1))
-     sleep 1
+     sleep 5
  done
 }
 

@@ -13,7 +13,7 @@ resources:
   source:
     password: ((docker.password))
     repository: concourse/porter-dev
-    tag: passed
+    tag: latest
     username: ((docker.username))
   icon: docker
 - name: porter-repo
@@ -67,6 +67,7 @@ jobs:
 - name: integration-test
   plan:
   - get: porter-repo
+    trigger: true
     passed:
     - build-ubuntu
   - task: run-tests
