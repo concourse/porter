@@ -38,17 +38,6 @@ resources:
     private_key: ((concourse_bot_private_key))
     uri: git@github.com:concourse/porter
   icon: tag
-- name: kind-release
-  type: github-release
-  source:
-    owner: kubernetes-sigs
-    repository: kind
-    access_token: ((concourse_github_dummy.access_token))
-    pre_release: true
-- name: kind-on-c
-  type: git
-  source:
-    uri: https://github.com/pivotal-k8s/kind-on-c
 resource_types:
 - name: docker-image
   type: registry-image
