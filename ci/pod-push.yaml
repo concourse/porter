@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: gcp-push-pod
-spec:  # specification of the pod's contents
+spec:
   restartPolicy: Never
   containers:
     - name: hello

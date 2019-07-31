@@ -77,44 +77,14 @@ jobs:
 
 - name: integration-test
   plan:
-  - get: porter-image-dev
-    trigger: true
-    passed:
-    - build-ubuntu
   - get: porter-repo
     passed:
     - build-ubuntu
-  - get: kind-on-c
-  - get: kind-release
-    params:
-      globs:
-        - kind-linux-amd64
-  - task: prepare-kind
-    config:
-      platform: linux
-      image_resource:
-        type: registry-image
-        source: { repository: bash }
-      inputs:
-        - name: porter-repo
-      outputs:
-        - name: inputs
-      run:
-        path: bash
-        args:
-          - -xeuc
-          - |
-            cp -a porter-repo inputs/
-  - task: run-kind
+  - task: run-tests
     privileged: true
-    file: kind-on-c/kind.yaml
+    file: porter-repo/ci/tasks/integration-test.yaml
     params:
-      KIND_TESTS: |
-        kubectl apply -f inputs/porter-repo/ci/cluster-role-binding.yaml
-        kubectl create secret generic gcp-secrets --from-literal=gcp-service-key='((gcp_service_key))'
-        kubectl apply -f inputs/porter-repo/ci/pod-push.yaml
-        sleep 12
-        kubectl apply -f inputs/porter-repo/ci/pod-pull.yaml
+      GCP_SERVICE_KEY: ((gcp_service_key))
 - name: publish-major
   plan:
   - in_parallel:

@@ -96,7 +96,7 @@ var _ = Describe("Watch", func() {
 					PodName:       "test-task-pod",
 				}
 			})
-			It("and exitCode is Zero, Watch returns nil error", func() {
+			XIt("and exitCode is Zero, Watch returns nil error", func() {
 				go func () {
 					watcher.Add(pod)
 
@@ -129,7 +129,7 @@ var _ = Describe("Watch", func() {
 				Expect(err).ToNot(HaveOccurred())
 			})
 
-			It("exitCode is NOT Zero, Watch returns an error", func() {
+			XIt("exitCode is NOT Zero, Watch returns an error", func() {
 
 				go func () {
 					watcher.Add(pod)
@@ -171,7 +171,7 @@ var _ = Describe("Watch", func() {
 				PodName:       "test-task-pod",
 			}
 		})
-		It("Watch returns an error", func() {
+		XIt("Watch returns an error", func() {
 			go func () {
 				watcher.Add(pod)
 			}()
