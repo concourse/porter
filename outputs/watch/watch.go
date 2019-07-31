@@ -23,15 +23,23 @@ type ContainerWatcher struct {
 }
 
 func (cw *ContainerWatcher) Wait(logger lager.Logger) error {
-	watch, err := cw.Client.CoreV1().Pods("default").Watch(metav1.ListOptions{
-		FieldSelector: fmt.Sprintf("metadata.name=%s", cw.PodName),
-	})
-	defer watch.Stop()
 
+	pod, err := cw.Client.CoreV1().Pods("default").Get(cw.PodName, metav1.GetOptions{})
 	if err != nil {
 		logger.Error("failed to find pod", err)
 		return err
 	}
+	fmt.Printf("Pod is found %+v\n", pod)
+
+	watch, err := cw.Client.CoreV1().Pods("default").Watch(metav1.ListOptions{
+		FieldSelector: fmt.Sprintf("metadata.name=%s", cw.PodName),
+	})
+	if err != nil {
+		logger.Error("failed to watch pod", err)
+		return err
+	}
+	defer watch.Stop()
+
 	for event := range watch.ResultChan() {
 		// We only care when event.Type == MODIFIED
 		// MODIFIED events occur when ContainerStatus is
