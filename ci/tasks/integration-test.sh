@@ -28,7 +28,7 @@ echo $GCP_SERVICE_KEY > /tmp/key
 gcloud auth activate-service-account --key-file /tmp/key
 gcloud container clusters create $CLUSTER_NAME \
   --cluster-version=latest --zone=$CLUSTER_ZONE \
-  --enable-autoscaling --min-nodes=1 --max-nodes=3
+  --min-nodes=1 --max-nodes=3
 
 
 kubectl create clusterrolebinding cluster-admin-binding \

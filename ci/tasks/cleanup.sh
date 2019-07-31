@@ -14,4 +14,4 @@ gcloud container clusters delete $CLUSTER_NAME --zone $CLUSTER_ZONE --quiet
 
 # clean up bucket
 # in case the task failed and we are still cleaning up, we don't this to fail
-gsutil rm gs://porter-dev-bucket/out.tar || true
+gsutil rm gs://porter-dev-bucket/out.tar 2> /dev/null || true
