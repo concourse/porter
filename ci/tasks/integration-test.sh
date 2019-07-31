@@ -7,7 +7,7 @@ set -o pipefail
 check(){
  PODNAME=$1
  attempt_counter=0
- max_attempts=5
+ max_attempts=10
  until [ $(kubectl get pod $PODNAME -o custom-columns=NAME:.status.phase --no-headers=true) == "Succeeded" ]; do
      if [ ${attempt_counter} -eq ${max_attempts} ];then
        echo "Max attempts reached"
@@ -28,8 +28,7 @@ echo $GCP_SERVICE_KEY > /tmp/key
 gcloud auth activate-service-account --key-file /tmp/key
 gcloud container clusters create $CLUSTER_NAME \
   --cluster-version=latest --zone=$CLUSTER_ZONE \
-  --min-nodes=1 --max-nodes=3
-
+  --num-nodes=1
 
 kubectl create clusterrolebinding cluster-admin-binding \
      --clusterrole=cluster-admin \
