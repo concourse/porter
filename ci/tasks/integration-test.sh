@@ -40,5 +40,3 @@ kubectl apply -f porter-repo/ci/pod-push.yaml
 check gcp-push-pod
 kubectl apply -f porter-repo/ci/pod-pull.yaml
 check gcp-pull-pod
-
-#gcloud container clusters delete $CLUSTER_NAME --zone $CLUSTER_ZONE

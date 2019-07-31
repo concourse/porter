@@ -10,7 +10,7 @@ export CLUSTER_ZONE=us-central1
 echo $GCP_SERVICE_KEY > /tmp/key
 
 gcloud auth activate-service-account --key-file /tmp/key
-gcloud container clusters delete $CLUSTER_NAME --zone $CLUSTER_ZONE
+gcloud container clusters delete $CLUSTER_NAME --zone $CLUSTER_ZONE --quiet
 
 # clean up bucket
 # in case the task failed and we are still cleaning up, we don't this to fail
