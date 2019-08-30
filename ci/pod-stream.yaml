@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gcp-logstream-pod
+spec:
+  restartPolicy: Never
+  containers:
+    - name: write-some-logs
+      image: busybox
+      command: ['sh', '-c', 'echo "here are some logs" > /workspace/logs']
+      volumeMounts:
+        - name: workspace
+          mountPath: "/workspace"
+    - name: stream-some-logs
+      imagePullPolicy: Always
+      image: concourse/porter-dev:dev
+      command: ["/opt/porter/logstream/logstream"]
+      args: ["--source-path", "/workspace/logs", "--pod-name", "gcp-logstream-pod", "--container-name", "write-some-logs"]
+      volumeMounts:
+        - name: workspace
+          mountPath: "/workspace"
+        - name: secret
+          mountPath: "/secret"
+          readOnly: true
+      env:
+        - name: "GOOGLE_APPLICATION_CREDENTIALS"
+          value: "/secret/gcp-service-key"
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: secret
+      secret:
+        secretName: gcp-secrets

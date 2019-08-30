@@ -20,6 +20,23 @@ check(){
  done
 }
 
+assert_log_output() {
+  POD=$1
+  CONTAINER=$2
+  EXPECTED=$3
+
+  ACTUAL=`kubectl logs $POD -c $CONTAINER`
+
+  if [ "$ACTUAL" != "$EXPECTED" ]; then
+    echo "Log output mismatch"
+    echo "Expected: $EXPECTED"
+    echo "Got: $ACTUAL"
+    exit 1
+  else
+    echo "log test successful!"
+  fi
+}
+
 export CLUSTER_NAME=porter-test-cluster
 export CLUSTER_ZONE=us-central1
 
@@ -39,3 +56,6 @@ kubectl apply -f porter-repo/ci/pod-push.yaml
 check gcp-push-pod
 kubectl apply -f porter-repo/ci/pod-pull.yaml
 check gcp-pull-pod
+kubectl apply -f porter-repo/ci/pod-stream.yaml
+check gcp-logstream-pod
+assert_log_output gcp-logstream-pod stream-some-logs "here are some logs"

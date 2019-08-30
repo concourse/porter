@@ -19,51 +19,52 @@ var (
 )
 
 type LogStreamCommand struct {
-	SourcePath    string `required:"true" long:"source-path" description:"Location to file to read."`
+	SourcePath    string `required:"true" long:"source-path" description:"Location of logfile to stream out."`
 	PodName       string `required:"true" long:"pod-name" positional-args:"yes" description:"Pod to watch"`
 	ContainerName string `required:"true" long:"container-name" positional-args:"yes" description:"Container to wait till completion"`
 }
 
-func (pc *LogStreamCommand) Execute(args []string) error {
+func streamLogfile(filepath string, EOFbackoff time.Duration, logger lager.Logger) {
+	var offset int64 = 0
+	var err error
 
-	go func(){
-		var offset int64 = 0
-		var err error
-
-		for {
-			if sourceFile == nil {
-				sourceFile, err = os.Open(pc.SourcePath)
-				if err != nil {
-					continue
-				}
-			}
-
-			_, err := sourceFile.Seek(offset, 0)
+	for {
+		if sourceFile == nil {
+			sourceFile, err = os.Open(filepath)
 			if err != nil {
-				logger.Error("reading source file", err)
-				return
-			}
-
-			b := make([]byte, 500)
-
-			count, err := sourceFile.Read(b)
-			// EOF will be false because the file is being actively appended to
-			if err == io.EOF {
-				time.Sleep(100 * time.Millisecond)
+				logger.Error("opening log file", err)
 				continue
-			} else if err != nil {
-				logger.Error("streaming source file", err)
 			}
-
-			// this byte array will be right-padded with 0s
-			// those get printed to stdout as newlines so let's discard them
-			fmt.Println(string(bytes.TrimRight(b, "\x00")))
-
-			// if SIGKILL {}
-
-			offset = offset + int64(count)
 		}
-	}()
+
+		_, err := sourceFile.Seek(offset, 0)
+		if err != nil {
+			logger.Error("reading source file", err)
+			return
+		}
+
+		b := make([]byte, 500)
+
+		count, err := sourceFile.Read(b)
+		// we don't want to bail on EOF while the file is being actively appended to
+		if err == io.EOF {
+			time.Sleep(EOFbackoff)
+			continue
+		} else if err != nil {
+			logger.Error("streaming source file", err)
+		}
+
+		// this byte array will be right-padded with 0s
+		// those get printed to stdout as newlines so let's discard them
+		fmt.Println(string(bytes.TrimRight(b, "\x00")))
+
+		// todo: listen for sigkill signal?
+		offset = offset + int64(count)
+	}
+}
+
+func (pc *LogStreamCommand) Execute(args []string) error {
+	go streamLogfile(pc.SourcePath, 100 * time.Millisecond, logger)
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
