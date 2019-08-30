@@ -10,7 +10,7 @@ COPY . .
 RUN ./scripts/test
 RUN cd ./outputs && go build .
 RUN cd ./inputs && go build .
-
+RUN cd ./logstream && go build .
 
 FROM ubuntu:bionic AS porter
 
@@ -22,6 +22,7 @@ RUN apt-get update && apt-get -y install \
 
 COPY --from=builder /src/outputs /opt/porter/out
 COPY --from=builder /src/inputs /opt/porter/in
+COPY --from=builder /src/logstream /opt/porter/logstream
 RUN chmod +x /opt/porter/*
 
 FROM porter

@@ -52,10 +52,10 @@ func (cw *ContainerWatcher) Wait(logger lager.Logger) error {
 
 			if containerInfo.Name == cw.ContainerName && state.Terminated != nil {
 				if state.Terminated.ExitCode == 0 {
-					logger.Info("monitored container exited successfully", lager.Data{})
+					logger.Debug("monitored container exited successfully", lager.Data{})
 					return nil
 				} else if state.Terminated.ExitCode != 0 {
-					logger.Info("monitored container returned non-zero exit code", lager.Data{
+					logger.Debug("monitored container returned non-zero exit code", lager.Data{
 						"podname":  cw.PodName,
 						"ExitCode": state.Terminated.ExitCode,
 					})
