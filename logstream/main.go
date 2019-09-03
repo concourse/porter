@@ -32,14 +32,12 @@ func streamLogfile(filepath string, EOFbackoff time.Duration, logger lager.Logge
 		if sourceFile == nil {
 			sourceFile, err = os.Open(filepath)
 			if err != nil {
-				logger.Error("opening log file", err)
 				continue
 			}
 		}
 
 		_, err := sourceFile.Seek(offset, 0)
 		if err != nil {
-			logger.Error("reading source file", err)
 			return
 		}
 
