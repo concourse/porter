@@ -8,6 +8,7 @@ RUN go mod download
 RUN go install github.com/onsi/ginkgo/ginkgo
 COPY . .
 RUN ./scripts/test
+RUN cd ./watch && go build .
 RUN cd ./outputs && go build .
 RUN cd ./inputs && go build .
 RUN cd ./logstream && go build .

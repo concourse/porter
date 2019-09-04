@@ -5,9 +5,9 @@ import (
 	"os"
 
 	"github.com/concourse/porter/blobio"
+	cwatch "github.com/concourse/porter/watch"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	cwatch "github.com/concourse/porter/outputs/watch"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/jessevdk/go-flags"

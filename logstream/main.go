@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/lager"
-	cwatch "github.com/concourse/porter/outputs/watch"
+	cwatch "github.com/concourse/porter/watch"
 	"github.com/jessevdk/go-flags"
 )
 

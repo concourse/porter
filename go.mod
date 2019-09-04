@@ -5,6 +5,7 @@ go 1.12
 require (
 	code.cloudfoundry.org/lager v2.0.0+incompatible
 	github.com/concourse/go-archive v1.0.1
+	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
