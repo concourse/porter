@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gcp-run-pod
+spec:
+  restartPolicy: Never
+  initContainers:
+    - name: copy-step
+      image: concourse/porter-dev:dev
+      imagePullPolicy: Always
+      command: ["cp"]
+      args: ["/opt/porter/runner/runner", "/tools/runner"]
+      volumeMounts:
+        - name: tools
+          mountPath: "/tools"
+  containers:
+    - name: input
+      image: ubuntu
+      imagePullPolicy: Always
+      command: ["/tools/runner"]
+      args: ["--entrypoint", "/bin/echo", "--args", "hello emi"]
+      volumeMounts:
+        - name: workspace
+          mountPath: "/workspace"
+        - name: tools
+          mountPath: "/tools"
+  volumes:
+    - name: workspace
+      emptyDir: {}
+    - name: tools
+      emptyDir: {}

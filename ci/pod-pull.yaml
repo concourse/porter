@@ -5,11 +5,16 @@ metadata:
 spec:
   restartPolicy: Never
   containers:
+    - name: copy-step
+      image: concourse:porter-dev:dev
+      command: ["cp","runner","/tools"]
     - name: input
       image: concourse/porter-dev:dev
       imagePullPolicy: Always
-      command: ["/opt/porter/in/inputs"]
-      args: ["--source-path", "out.tar", "--bucket-url", "gs://porter-dev-bucket", "--destination-path", "/" ]
+      command: ["/tools-vol/runner"]
+      args: ["--entrypoint", "/opt/porter/in/inputs", "--source-path", "out.tar", "--bucket-url", "gs://porter-dev-bucket", "--destination-path", "/" ]
+#      command: ["/opt/porter/in/inputs"]
+#      args: ["--source-path", "out.tar", "--bucket-url", "gs://porter-dev-bucket", "--destination-path", "/" ]
       volumeMounts:
         - name: workspace
           mountPath: "/workspace"
