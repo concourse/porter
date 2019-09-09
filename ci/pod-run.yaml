@@ -14,7 +14,7 @@ spec:
         - name: tools
           mountPath: "/tools"
   containers:
-    - name: input
+    - name: task-container
       image: ubuntu
       imagePullPolicy: Always
       command: ["/tools/runner"]
